@@ -375,7 +375,83 @@ class BloodRequestApp(tk.Toplevel):  # Changed from tk.Tk to tk.Toplevel
             messagebox.showinfo("Success", f"Request submitted and QR codes generated.")
         else:
             messagebox.showwarning("Incomplete", "Request submitted, but not fully approved.")
+class DatabaseViewer(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Database Viewer")
+        self.geometry("1000x600")
+        
+        # Configure DB connection
+        self.conn = mysql.connector.connect(**DB_CONFIG)
+        self.cursor = self.conn.cursor()
+        
+        self.create_widgets()
+        self.load_data()
+        
+        # Center window
+        self.update_idletasks()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (parent.winfo_screenwidth() // 2) - (width // 2)
+        y = (parent.winfo_screenheight() // 2) - (height // 2)
+        self.geometry(f'+{x}+{y}')
+        
+        self.grab_set()
     
+    def create_widgets(self):
+        # Table selector
+        self.table_var = tk.StringVar()
+        tables = ["donor_registration", "blood_requests", "units2"]
+        tk.Label(self, text="Select Table:").pack(pady=5)
+        table_menu = ttk.Combobox(self, textvariable=self.table_var, values=tables)
+        table_menu.pack()
+        table_menu.bind("<<ComboboxSelected>>", lambda e: self.load_data())
+        
+        # Treeview for data display
+        self.tree = ttk.Treeview(self)
+        self.tree.pack(expand=True, fill='both', padx=10, pady=10)
+        
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.tree.yview)
+        scrollbar.pack(side='right', fill='y')
+        self.tree.configure(yscrollcommand=scrollbar.set)
+        
+        # Refresh button
+        tk.Button(self, text="Refresh", command=self.load_data, bg="#4ecdc4").pack(pady=5)
+    
+    def load_data(self):
+        table = self.table_var.get()
+        if not table:
+            return
+            
+        try:
+            # Clear existing data
+            self.tree.delete(*self.tree.get_children())
+            
+            # Get column names
+            self.cursor.execute(f"SHOW COLUMNS FROM {table}")
+            columns = [column[0] for column in self.cursor.fetchall()]
+            self.tree["columns"] = columns
+            self.tree["show"] = "headings"
+            
+            # Set up columns
+            for col in columns:
+                self.tree.heading(col, text=col)
+                self.tree.column(col, width=100, anchor='center')
+            
+            # Fetch data
+            self.cursor.execute(f"SELECT * FROM {table} LIMIT 100")
+            for row in self.cursor.fetchall():
+                self.tree.insert("", "end", values=row)
+                
+        except mysql.connector.Error as err:
+            messagebox.showerror("Database Error", str(err))
+    
+    def __del__(self):
+        if hasattr(self, 'conn') and self.conn.is_connected():
+            self.cursor.close()
+            self.conn.close()
+            
 if __name__ == "__main__":
     app = BloodRequestApp()
     app.mainloop()

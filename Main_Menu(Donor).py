@@ -11,7 +11,7 @@ import os
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from PIL import Image, ImageTk
-
+from sklearn.metrics import accuracy_score  # Add this import at the top
 # ----------------------------
 # Existing Classes (Unchanged)
 # ----------------------------
@@ -36,6 +36,10 @@ class BloodDonorPredictor:
             self.model.fit(X_train, y_train)
             self.columns = X_train.columns.tolist()
             print("✅ Model trained successfully.")
+             # 🔍 Accuracy calculation
+            y_pred = self.model.predict(X_test)
+            acc = accuracy_score(y_test, y_pred)
+            print(f"✅ Model trained successfully with accuracy: {acc:.2f}")
         except Exception as e:
             print(f"❌ Error loading data: {e}")
             sys.exit(1)
@@ -46,6 +50,7 @@ class BloodDonorPredictor:
             prediction = self.model.predict(self.user_data)
             result = "Eligible" if prediction[0] == 1 else "Not Eligible"
             print(f"\n✅ Eligibility Prediction: {result}")
+            
             return result
         except Exception as e:
             print(f"❌ Error during prediction: {e}")
@@ -291,7 +296,14 @@ class BloodBankApp:
     
     
     def open_database(self):
-        messagebox.showinfo("Info", "Database viewer would open here")
+     #Open the database viewer window
+     try:
+        from Blood_Request import DatabaseViewer
+        DatabaseViewer(self.root)
+     except ImportError as e:
+        messagebox.showerror("Error", f"Cannot open Database Viewer: {str(e)}")
+     except Exception as e:
+        messagebox.showerror("Error", f"Database connection failed: {str(e)}")
     
     def open_donation(self):
         DonationWindow(self.root)
