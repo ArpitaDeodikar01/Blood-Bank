@@ -262,18 +262,40 @@ class BloodBankApp:
         footer.pack(fill='x', side='bottom')
         tk.Button(footer, text="Exit", command=self.root.quit, 
                  bg="#ff6b6b", fg="white").pack(side='right', padx=20, pady=10)
+    # In your BloodBankApp class, modify these methods:
+
     
-    def open_donation(self):
-        DonationWindow(self.root)
+    def open_analytics(self):
+     try:
+        from Graph import show_analytics_menu
+        show_analytics_menu(self.root)  # Pass the root window as parent
+     except ImportError as e:
+        messagebox.showerror("Error", f"Cannot open Analytics: {str(e)}")
+     except Exception as e:
+        messagebox.showerror("Error", f"Failed to open analytics: {str(e)}")
+
+        
     
+
     def open_collection(self):
-        messagebox.showinfo("Info", "Blood collection module would open here")
+     try:
+        from Blood_Request import BloodRequestApp
+        # Create a Toplevel window instead of a new Tk instance
+        request_window = tk.Toplevel(self.root)
+        request_app = BloodRequestApp(request_window)
+        request_window.grab_set()  # Make it modal
+     except ImportError as e:
+        messagebox.showerror("Error", f"Cannot open Blood Collection: {str(e)}")
+     except Exception as e:
+        messagebox.showerror("Error", f"Failed to open collection module: {str(e)}")
+    
     
     def open_database(self):
         messagebox.showinfo("Info", "Database viewer would open here")
     
-    def open_analytics(self):
-        messagebox.showinfo("Info", "Analytics dashboard would open here")
+    def open_donation(self):
+        DonationWindow(self.root)
+    
 
 class DonationWindow:
     def __init__(self, parent):
@@ -284,7 +306,7 @@ class DonationWindow:
         
         self.predictor = BloodDonorPredictor()
         try:
-            self.predictor.load_data('D:/PSDL_ASSIGNMENT/BLOOD_BANK/BLOOD_BANK/Donor.csv')
+            self.predictor.load_data(r'C:\Users\LENOVO\Desktop\Blood_Bank_System\Donor.csv')
             self.show_health_form()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load model: {str(e)}")
@@ -411,6 +433,8 @@ class DonationWindow:
             messagebox.showerror("Input Error", str(e))
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
+    
+    
     
     def clear_window(self):
         for widget in self.window.winfo_children():

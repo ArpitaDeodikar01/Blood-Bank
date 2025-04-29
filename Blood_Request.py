@@ -229,15 +229,63 @@ def process_approved_requests():
             cursor.close()
             connection.close()
 
-class BloodRequestApp(tk.Tk):
-    def __init__(self):
-        super().__init__()
+class DonationWindow(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.title("Blood Donation")
+        self.geometry("900x700")
+        
+        # Add your donation form widgets here
+        tk.Label(self, text="Blood Donation Form", font=('Helvetica', 20)).pack(pady=20)
+        
+        # Example form field
+        tk.Label(self, text="Donor Name:").pack()
+        self.name_entry = tk.Entry(self)
+        self.name_entry.pack()
+        
+        # Add more form fields as needed...
+        
+        submit_btn = tk.Button(self, text="Submit Donation", command=self.submit_donation)
+        submit_btn.pack(pady=20)
+        
+        # Center window
+        self.update_idletasks()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry(f'+{x}+{y}')
+        
+        # Make window modal
+        self.grab_set()
+    
+    def submit_donation(self):
+        # Handle form submission
+        donor_name = self.name_entry.get()
+        messagebox.showinfo("Success", f"Thank you for donating, {donor_name}!")
+        self.destroy()
+
+class BloodRequestApp(tk.Toplevel):  # Changed from tk.Tk to tk.Toplevel
+    def __init__(self, parent):
+        super().__init__(parent)
         self.title("Blood Bank Request System")
         self.geometry("600x500")
         self.resizable(False, False)
-
+        
         self.create_widgets()
         setup_database()
+        
+        # Center the window
+        self.update_idletasks()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry(f'+{x}+{y}')
+        
+        # Make window modal
+        self.grab_set()
 
     def create_widgets(self):
         title = tk.Label(self, text="Blood Request Form", font=("Arial", 18, "bold"))
@@ -327,7 +375,7 @@ class BloodRequestApp(tk.Tk):
             messagebox.showinfo("Success", f"Request submitted and QR codes generated.")
         else:
             messagebox.showwarning("Incomplete", "Request submitted, but not fully approved.")
-
+    
 if __name__ == "__main__":
     app = BloodRequestApp()
     app.mainloop()
