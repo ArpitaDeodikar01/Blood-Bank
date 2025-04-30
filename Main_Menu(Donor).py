@@ -176,11 +176,12 @@ class CertificateGenerator:
             print(f"❌ Error loading fonts: {e}")
             return False
 
-        name_text = donor_name
+        name_text = donor_name.strip()
         name_bbox = draw.textbbox((0, 0), name_text, font=name_font)
-        name_x = (pil_image.width - (name_bbox[2] - name_bbox[0])) / 2
-        name_y = pil_image.height - 600
-        draw.text((name_x, name_y), name_text, font=name_font, fill=(0, 0, 0))
+        name_width = name_bbox[2] - name_bbox[0]
+        name_x = int((pil_image.width - name_width) / 2)
+        name_y = pil_image.height - 500
+        draw.text((name_x, name_y), name_text, font=name_font,fill=(0,0,0))
 
         details_text = f"for donating {quantity_ml}ml of {blood_type} blood on {donation_date}"
         details_bbox = draw.textbbox((0, 0), details_text, font=details_font)
